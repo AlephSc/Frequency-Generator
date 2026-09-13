@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frequency Generator Indonesia — Tone, Sweep & Noise</title>
+  <meta name="description" content="Frequency generator gratis: tone sine/square/sawtooth/triangle 1–20000 Hz, frequency sweep dengan loop, white/pink/brown noise dengan bandpass, visualizer, dan export WAV." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo">
+        <div class="logo-mark">◉</div>
+        <div>
+          <h1>Frequency Generator</h1>
+          <p> Tone • Sweep • Noise — 100% di browser</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="#generator">Generator</a>
+        <a href="#sweep">Sweep</a>
+        <a href="#noise">Noise</a>
+        <a href="#bantuan">Bantuan</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="warning">
+      ⚠️ <strong>Perhatian:</strong> selalu mulai dari volume kecil. Frekuensi sangat rendah / sangat tinggi bisa merusak speaker atau pendengaran. Naikkan volume perlahan.
+    </div>
+
+    <!-- ============ GENERATOR ============ -->
+    <section id="generator" class="card">
+      <div class="card-head">
+        <h2>🎵 Generator Nada</h2>
+        <span id="toneStatus" class="badge">Berhenti</span>
+      </div>
+      <p class="muted">Masukkan frekuensi yang diinginkan lalu tekan Play. Nada akan berbunyi terus sampai tombol Stop ditekan.</p>
+
+      <div class="grid-2">
+        <div>
+          <label class="label" for="freqInput">Frekuensi (1 – 20000 Hz)</label>
+          <div class="freq-row">
+            <input id="freqInput" type="number" min="1" max="20000" step="1" value="440" />
+            <span class="unit">Hz</span>
+          </div>
+          <input id="freqSlider" type="range" min="0" max="1000" value="644" aria-label="Slider frekuensi (logaritmik)" />
+          <div class="scale-hint"><span>1 Hz</span><span>Skala logaritmik</span><span>20 kHz</span></div>
+
+          <div class="presets">
+            <span class="label">Preset cepat:</span>
+            <div class="preset-btns">
+              <button data-freq="100">100</button>
+              <button data-freq="432">432</button>
+              <button data-freq="440" class="active">440</button>
+              <button data-freq="528">528</button>
+              <button data-freq="1000">1k</button>
+              <button data-freq="5000">5k</button>
+              <button data-freq="10000">10k</button>
+              <button data-freq="15000">15k</button>
+            </div>
+          </div>
+
+          <label class="label">Bentuk gelombang</label>
+          <div class="wave-btns" role="radiogroup" aria-label="Waveform">
+            <button data-wave="sine" class="active">Sine</button>
+            <button data-wave="square">Square</button>
+            <button data-wave="sawtooth">Sawtooth</button>
+            <button data-wave="triangle">Triangle</button>
+          </div>
+          <p id="waveDesc" class="muted small">Sine: murni & halus, tanpa harmonik. Cocok untuk tuning & referensi.</p>
+        </div>
+
+        <div>
+          <label class="label" for="toneCanvas">Visualizer (osiloskop)</label>
+          <canvas id="toneCanvas" width="600" height="180"></canvas>
+          <div class="big-readout"><span id="toneReadout">440</span><small>Hz • <span id="toneWaveLabel">sine</span></small></div>
+
+          <label class="label" for="volSlider">Volume: <span id="volLabel">50%</span></label>
+          <input id="volSlider" type="range" min="0" max="100" value="50" />
+
+          <div class="btn-row">
+            <button id="tonePlayBtn" class="btn primary">▶ Play</button>
+            <button id="toneStopBtn" class="btn" disabled>⏹ Stop</button>
+          </div>
+
+          <div class="save-row">
+            <label for="toneDur">Durasi WAV:</label>
+            <select id="toneDur">
+              <option value="1">1 detik</option>
+              <option value="3">3 detik</option>
+              <option value="5" selected>5 detik</option>
+              <option value="10">10 detik</option>
+            </select>
+            <button id="toneSaveBtn" class="btn small">💾 Simpan WAV</button>
+            <button id="toneShareBtn" class="btn small ghost">🔗 Salin Link</button>
+          </div>
+          <p class="muted small">💡 Klik kotak frekuensi lalu pakai <kbd>↑</kbd>/<kbd>↓</kbd> (±1 Hz), <kbd>Shift</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> (±10 Hz). Bisa juga share via URL: <code>?freq=432&amp;waveform=sine</code></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SWEEP ============ -->
+    <section id="sweep" class="card">
+      <div class="card-head">
+        <h2>🔁 Frequency Sweep + Loop</h2>
+        <span id="sweepStatus" class="badge">Berhenti</span>
+      </div>
+      <p class="muted">Mainkan sapuan frekuensi dari frekuensi awal ke frekuensi akhir dalam durasi tertentu. Aktifkan <strong>Loop</strong> untuk mengulang terus-menerus (cocok untuk burn-in speaker / tes ruangan).</p>
+
+      <div class="grid-2">
+        <div>
+          <div class="form-grid">
+            <div>
+              <label class="label" for="sweepStart">Frekuensi awal (Hz)</label>
+              <input id="sweepStart" type="number" min="1" max="20000" value="20" />
+            </div>
+            <div>
+              <label class="label" for="sweepEnd">Frekuensi akhir (Hz)</label>
+              <input id="sweepEnd" type="number" min="1" max="20000" value="20000" />
+            </div>
+            <div>
+              <label class="label" for="sweepDur">Durasi (detik)</label>
+              <input id="sweepDur" type="number" min="0.5" max="120" step="0.5" value="10" />
+            </div>
+            <div>
+              <label class="label" for="sweepDelay">Jeda antar loop (detik)</label>
+              <input id="sweepDelay" type="number" min="0" max="10" step="0.5" value="0.5" />
+            </div>
+          </div>
+
+          <label class="label">Waveform sweep</label>
+          <div class="wave-btns" id="sweepWaveBtns">
+            <button data-wave="sine" class="active">Sine</button>
+            <button data-wave="square">Square</button>
+            <button data-wave="sawtooth">Sawtooth</button>
+            <button data-wave="triangle">Triangle</button>
+          </div>
+
+          <label class="label">Mode sweep</label>
+          <div class="radio-row">
+            <label><input type="radio" name="sweepMode" value="linear" checked /> Linear</label>
+            <label><input type="radio" name="sweepMode" value="exponential" /> Eksponensial (log)</label>
+          </div>
+
+          <div class="check-row">
+            <label><input type="checkbox" id="sweepLoop" checked /> 🔁 Loop terus sampai Stop</label>
+            <label><input type="checkbox" id="sweepContinue" /> Lanjutkan nada setelah sweep selesai</label>
+          </div>
+
+          <label class="label" for="sweepStartVol">Volume awal: <span id="sweepStartVolLabel">40%</span></label>
+          <input id="sweepStartVol" type="range" min="1" max="100" value="40" />
+          <label class="label" for="sweepEndVol">Volume akhir: <span id="sweepEndVolLabel">40%</span></label>
+          <input id="sweepEndVol" type="range" min="1" max="100" value="40" />
+        </div>
+
+        <div>
+          <label class="label" for="sweepCanvas">Visualizer sweep</label>
+          <canvas id="sweepCanvas" width="600" height="180"></canvas>
+          <div class="sweep-readout">
+            <div><small>Frekuensi saat ini</small><strong id="sweepCurFreq">— Hz</strong></div>
+            <div><small>Waktu</small><strong id="sweepCurTime">0.0 dtk</strong></div>
+            <div><small>Putaran</small><strong id="sweepLoopCount">0</strong></div>
+          </div>
+          <div class="progress"><div id="sweepProgress"></div></div>
+          <div class="btn-row">
+            <button id="sweepPlayBtn" class="btn primary">▶ Mulai Sweep</button>
+            <button id="sweepStopBtn" class="btn" disabled>⏹ Stop</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ NOISE ============ -->
+    <section id="noise" class="card">
+      <div class="card-head">
+        <h2>🌊 White / Pink / Brown Noise + Bandpass</h2>
+        <span id="noiseStatus" class="badge">Berhenti</span>
+      </div>
+      <p class="muted">Noise untuk tes speaker, masking suara, relaksasi, atau kalibrasi. Aktifkan <strong>Bandpass</strong> untuk hanya meloloskan pita frekuensi tertentu.</p>
+
+      <div class="grid-2">
+        <div>
+          <label class="label">Jenis noise</label>
+          <div class="wave-btns" id="noiseTypeBtns">
+            <button data-noise="white" class="active">White</button>
+            <button data-noise="pink">Pink</button>
+            <button data-noise="brown">Brown</button>
+          </div>
+          <p id="noiseDesc" class="muted small">White: energi merata di semua frekuensi. Terdengar “mendesis” terang.</p>
+
+          <label class="label" for="noiseVol">Volume: <span id="noiseVolLabel">30%</span></label>
+          <input id="noiseVol" type="range" min="0" max="100" value="30" />
+
+          <div class="bandpass-box">
+            <label class="check"><input type="checkbox" id="bpEnable" /> 🎚️ Aktifkan Bandpass Filter</label>
+            <label class="label" for="bpFreq">Frekuensi tengah: <span id="bpFreqLabel">1000 Hz</span></label>
+            <input id="bpFreqSlider" type="range" min="0" max="1000" value="500" />
+            <div class="form-grid">
+              <div>
+                <label class="label" for="bpFreqInput">Hz tepat</label>
+                <input id="bpFreqInput" type="number" min="20" max="20000" value="1000" />
+              </div>
+              <div>
+                <label class="label" for="bpQ">Q (ketajaman): <span id="bpQLabel">1.0</span></label>
+                <input id="bpQ" type="range" min="0.5" max="10" step="0.1" value="1" />
+              </div>
+            </div>
+            <p class="muted small">Q kecil = pita lebar, Q besar = pita sempit/tajam. Perubahan berlaku live saat noise berbunyi.</p>
+          </div>
+        </div>
+
+        <div>
+          <label class="label" for="noiseCanvas">Visualizer spektrum</label>
+          <canvas id="noiseCanvas" width="600" height="180"></canvas>
+          <div class="btn-row">
+            <button id="noisePlayBtn" class="btn primary">▶ Play Noise</button>
+            <button id="noiseStopBtn" class="btn" disabled>⏹ Stop</button>
+          </div>
+          <div class="save-row">
+            <label for="noiseDur">Durasi WAV:</label>
+            <select id="noiseDur">
+              <option value="3">3 detik</option>
+              <option value="5" selected>5 detik</option>
+              <option value="10">10 detik</option>
+              <option value="30">30 detik</option>
+            </select>
+            <button id="noiseSaveBtn" class="btn small">💾 Simpan Noise WAV</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BANTUAN ============ -->
+    <section id="bantuan" class="card">
+      <h2>❓ Bantuan & Info</h2>
+      <div class="grid-3">
+        <div>
+          <h3>Sine / Square / Saw / Triangle?</h3>
+          <ul>
+            <li><strong>Sine:</strong> murni, halus. Untuk tuning & referensi.</li>
+            <li><strong>Square:</strong> tajam, kaya harmonik ganjil.</li>
+            <li><strong>Sawtooth:</strong> terang & buzzy, semua harmonik.</li>
+            <li><strong>Triangle:</strong> lembut, perpaduan sine & square.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>White / Pink / Brown?</h3>
+          <ul>
+            <li><strong>White:</strong> mendesis terang, semua frekuensi sama kuat.</li>
+            <li><strong>Pink:</strong> lebih seimbang di telinga, bass lebih hangat.</li>
+            <li><strong>Brown:</strong> deep, dominan frekuensi rendah (seperti air terjun jauh).</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Tips aman</h3>
+          <ul>
+            <li>Mulai dari volume 20–30%, naikkan perlahan.</li>
+            <li>Lepas earphone saat coba frekuensi ekstrem.</li>
+            <li>Di HP, gunakan tombol Play (browser butuh gestur sentuh untuk audio).</li>
+            <li>File WAV tersimpan sesuai volume & filter saat ini.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Dibuat dengan Web Audio API • Berjalan 100% lokal di browser, tanpa upload • © 2026 Frequency Generator ID</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
